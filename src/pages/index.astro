@@ -56,7 +56,7 @@ const sortedDeals = allDeals.sort(
 
   <main class="grid" id="deals-grid">
     {sortedDeals.map((deal) => {
-      const { title, platform, price, oldPrice, store, coupon, url, image } = deal.frontmatter;
+      const { title = "Promocja", platform = "PC", price = 0, oldPrice, store = "Sklep", coupon, url = "#", image = "" } = deal.frontmatter || {};
       const discount = oldPrice ? Math.round(((oldPrice - price) / oldPrice) * 100) : 0;
       return (
         <article class="card" data-platform={platform} data-title={title.toLowerCase()}>
