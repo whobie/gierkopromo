@@ -1,0 +1,123 @@
+---
+const matches = import.meta.glob('../content/deals/*.md', { eager: true });
+const allDeals = Object.values(matches) as any[];
+const sortedDeals = allDeals.sort(
+  (a, b) => new Date(b.frontmatter.date).getTime() - new Date(a.frontmatter.date).getTime()
+);
+---
+
+<html lang="pl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>GamePromki – Najlepsze okazje i promocje na gry</title>
+  <style>
+    :root { --bg: #0f172a; --card: #1e293b; --accent: #22c55e; --text: #f8fafc; --muted: #94a3b8; }
+    * { box-sizing: border-box; }
+    body { font-family: system-ui, -apple-system, sans-serif; background: var(--bg); color: var(--text); margin: 0; padding: 0; }
+    header { background: #1e293b; padding: 1.2rem 2rem; border-bottom: 1px solid #334155; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem; }
+    .logo { font-size: 1.5rem; font-weight: 800; color: var(--accent); text-decoration: none; }
+    .search-box { padding: 0.6rem 1rem; border-radius: 8px; border: 1px solid #475569; background: #0f172a; color: white; width: 260px; font-size: 0.95rem; }
+    .filters { max-width: 1200px; margin: 1.5rem auto; padding: 0 1rem; display: flex; gap: 0.5rem; flex-wrap: wrap; }
+    .filter-btn { background: var(--card); color: var(--text); border: 1px solid #334155; padding: 0.5rem 1.1rem; border-radius: 99px; cursor: pointer; font-weight: 600; transition: 0.2s; }
+    .filter-btn:hover { border-color: var(--accent); }
+    .filter-btn.active { background: var(--accent); color: #052e16; border-color: var(--accent); }
+    .grid { max-width: 1200px; margin: 0 auto 3rem; padding: 0 1rem; display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 1.5rem; }
+    .card { background: var(--card); border-radius: 12px; overflow: hidden; border: 1px solid #334155; display: flex; flex-direction: column; transition: transform 0.2s; }
+    .card:hover { transform: translateY(-3px); border-color: #475569; }
+    .card img { width: 100%; height: 170px; object-fit: cover; background: #0f172a; }
+    .card-body { padding: 1.2rem; display: flex; flex-direction: column; flex-grow: 1; }
+    .badges { display: flex; justify-content: space-between; font-size: 0.75rem; margin-bottom: 0.5rem; }
+    .platform { background: #334155; padding: 0.25rem 0.6rem; border-radius: 6px; font-weight: 600; }
+    .discount { background: #dc2626; color: white; padding: 0.25rem 0.6rem; border-radius: 6px; font-weight: 700; }
+    h2 { font-size: 1.15rem; margin: 0.4rem 0 0.8rem; line-height: 1.35; }
+    .prices { display: flex; align-items: baseline; gap: 0.7rem; margin-top: auto; padding-top: 1rem; }
+    .new-price { font-size: 1.5rem; font-weight: 800; color: var(--accent); }
+    .old-price { text-decoration: line-through; color: var(--muted); font-size: 0.95rem; }
+    .coupon { margin-top: 0.8rem; background: #0f172a; border: 1px dashed var(--accent); padding: 0.45rem 0.8rem; border-radius: 6px; display: flex; justify-content: space-between; align-items: center; font-size: 0.85rem; }
+    .copy-btn { background: none; border: none; color: #22c55e; cursor: pointer; font-weight: 700; }
+    .btn { display: block; text-align: center; background: var(--accent); color: #052e16; font-weight: 700; text-decoration: none; padding: 0.75rem; border-radius: 8px; margin-top: 1rem; }
+    .btn:hover { opacity: 0.9; }
+  </style>
+</head>
+<body>
+  <header>
+    <a href="/" class="logo">🎮 GamePromki</a>
+    <input type="text" id="search" class="search-box" placeholder="Szukaj gry...">
+  </header>
+
+  <div class="filters">
+    <button class="filter-btn active" data-platform="ALL">Wszystkie</button>
+    <button class="filter-btn" data-platform="PC">PC</button>
+    <button class="filter-btn" data-platform="PS5">PS5</button>
+    <button class="filter-btn" data-platform="Xbox">Xbox</button>
+    <button class="filter-btn" data-platform="Switch">Switch</button>
+  </div>
+
+  <main class="grid" id="deals-grid">
+    {sortedDeals.map((deal) => {
+      const { title, platform, price, oldPrice, store, coupon, url, image } = deal.frontmatter;
+      const discount = oldPrice ? Math.round(((oldPrice - price) / oldPrice) * 100) : 0;
+      return (
+        <article class="card" data-platform={platform} data-title={title.toLowerCase()}>
+          <img src={image} alt={title} loading="lazy" />
+          <div class="card-body">
+            <div class="badges">
+              <span class="platform">{platform} • {store}</span>
+              {discount > 0 && <span class="discount">-{discount}%</span>}
+            </div>
+            <h2>{title}</h2>
+            <div class="prices">
+              <span class="new-price">{price.toFixed(2).replace('.', ',')} zł</span>
+              {oldPrice && <span class="old-price">{oldPrice.toFixed(2).replace('.', ',')} zł</span>}
+            </div>
+            {coupon && (
+              <div class="coupon">
+                <span>Kod: <strong>{coupon}</strong></span>
+                <button class="copy-btn" data-code={coupon}>Kopiuj</button>
+              </div>
+            )}
+            <a href={url} target="_blank" rel="nofollow sponsored" class="btn">Przejdź do okazji →</a>
+          </div>
+        </article>
+      );
+    })}
+  </main>
+
+  <script>
+    const buttons = document.querySelectorAll('.filter-btn');
+    const cards = document.querySelectorAll('.card');
+    const searchInput = document.getElementById('search') as HTMLInputElement;
+
+    buttons.forEach(btn => {
+      btn.addEventListener('click', () => {
+        buttons.forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        const filter = (btn as HTMLElement).dataset.platform || 'ALL';
+        cards.forEach(card => {
+          const el = card as HTMLElement;
+          const match = filter === 'ALL' || (el.dataset.platform || '').includes(filter);
+          el.style.display = match ? 'flex' : 'none';
+        });
+      });
+    });
+
+    searchInput?.addEventListener('input', (e) => {
+      const q = (e.target as HTMLInputElement).value.toLowerCase();
+      cards.forEach(card => {
+        const el = card as HTMLElement;
+        el.style.display = (el.dataset.title || '').includes(q) ? 'flex' : 'none';
+      });
+    });
+
+    document.querySelectorAll('.copy-btn').forEach(btn => {
+      btn.addEventListener('click', () => {
+        const code = (btn as HTMLElement).dataset.code || '';
+        navigator.clipboard.writeText(code);
+        btn.textContent = 'Skopiowano!';
+        setTimeout(() => btn.textContent = 'Kopiuj', 2000);
+      });
+    });
+  </script>
+</body>
+</html>

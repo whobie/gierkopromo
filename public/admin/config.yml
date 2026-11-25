@@ -1,0 +1,27 @@
+backend:
+  name: github
+  repo: TWOJ_LOGIN_GITHUB/game-promki
+  branch: main
+  base_url: https://api.netlify.com
+  auth_endpoint: auth
+
+media_folder: "public/images/uploads"
+public_folder: "/images/uploads"
+
+collections:
+  - name: "deals"
+    label: "Promocje na gry"
+    folder: "src/content/deals"
+    create: true
+    slug: "{{year}}-{{month}}-{{day}}-{{slug}}"
+    fields:
+      - { label: "Tytuł gry", name: "title", widget: "string" }
+      - { label: "Platforma", name: "platform", widget: "select", options: ["PC / Steam", "PC / Epic", "PS5", "Xbox", "Nintendo Switch"] }
+      - { label: "Cena promocyjna (zł)", name: "price", widget: "number", value_type: "float" }
+      - { label: "Cena regularna (zł)", name: "oldPrice", widget: "number", value_type: "float", required: false }
+      - { label: "Sklep", name: "store", widget: "string", default: "Steam" }
+      - { label: "Kod rabatowy (opcjonalnie)", name: "coupon", widget: "string", required: false }
+      - { label: "Link do promocji", name: "url", widget: "string" }
+      - { label: "Okładka gry (obrazek)", name: "image", widget: "image" }
+      - { label: "Data dodania", name: "date", widget: "datetime" }
+      - { label: "Opis / warunki promocji", name: "body", widget: "markdown", required: false }
